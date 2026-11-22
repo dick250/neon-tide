@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<!-- <System>: Canvas plus the full HUD and menu DOM skeleton; loads vendored three.js then 31 classic scripts in order. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neon Tide</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<div id="hud">
+  <div id="objective"><div id="objTitle"></div><div id="objText"></div></div>
+  <div id="cashBox">
+    <div id="cash">$0</div>
+    <div id="stars"></div>
+    <div id="clock"></div>
+  </div>
+  <div id="minimapWrap">
+    <canvas id="minimap" width="220" height="220"></canvas>
+    <div id="bustWrap"><div id="bustLabel">BUSTED</div><div id="bustBar"><div id="bustFill"></div></div></div>
+  </div>
+  <div id="vitals">
+    <div id="weaponName">FISTS</div>
+    <div id="ammo">—</div>
+    <div class="bar"><div id="hpFill"></div></div>
+    <div class="bar armor"><div id="armorFill"></div></div>
+    <div id="carBox">
+      <div id="speedo"><span id="speedVal">0</span><small>km/h</small></div>
+      <div class="bar carhp"><div id="carHpFill"></div></div>
+    </div>
+  </div>
+  <div id="crosshair"></div>
+  <div id="edgeArrow">▸</div>
+  <div id="prompt"></div>
+  <div id="toasts"></div>
+  <div id="dialogue"><div id="dlgName"></div><div id="dlgText"></div></div>
+  <div id="logoShot">NEON TIDE</div>
+</div>
+<div id="dmgFlash"></div>
+<div id="perfPanel"></div>
+
+<div id="titleScreen" class="screen">
+  <h1 class="gameTitle">NEON <span>TIDE</span></h1>
+  <div class="gameSub">CORAL BAY</div>
+  <div id="titleMsg"></div>
+  <button id="btnContinue" class="menuBtn">CONTINUE</button>
+  <button id="btnNew" class="menuBtn">NEW GAME</button>
+  <button id="btnTitleSettings" class="menuBtn">SETTINGS</button>
+  <button id="btnControls" class="menuBtn">CONTROLS</button>
+  <div id="controlsPanel">
+    WASD move / drive · Mouse look · Right mouse aim · Left mouse attack<br>
+    F enter/exit car · E interact · Shift sprint · Space handbrake · 1–5 weapons · R reload<br>
+    M map · N mute · Esc pause · F3 performance
+  </div>
+  <div class="titleHint">Click to play — mouse locks for looking around. Headphones recommended.</div>
+</div>
+
+<div id="pauseMenu" class="screen">
+  <h2>PAUSED</h2>
+  <button id="btnResume" class="menuBtn">RESUME</button>
+  <button id="btnSave" class="menuBtn">SAVE</button>
+  <button id="btnPauseSettings" class="menuBtn">SETTINGS</button>
+  <button id="btnQuitTitle" class="menuBtn">SAVE &amp; TITLE</button>
+</div>
+
+<div id="settingsMenu" class="screen">
+  <h2>SETTINGS</h2>
+  <label>Master volume <input id="setMaster" type="range" min="0" max="1" step="0.05"></label>
+  <label>Music <input id="setMusic" type="range" min="0" max="1" step="0.05"></label>
+  <label>Effects <input id="setSfx" type="range" min="0" max="1" step="0.05"></label>
+  <label>Mouse sensitivity <input id="setSens" type="range" min="0.4" max="2" step="0.1"></label>
+  <label>Quality <select id="setQuality"><option value="high">High</option><option value="low">Low</option></select></label>
+  <label>Show FPS <input id="setFps" type="checkbox"></label>
+  <button id="btnSettingsBack" class="menuBtn">BACK</button>
+</div>
+
+<div id="shopMenu" class="screen">
+  <h2 id="shopTitle">SHOP</h2>
+  <div id="shopCash"></div>
+  <div id="shopItems"></div>
+  <button id="btnShopClose" class="menuBtn">LEAVE</button>
+</div>
+
+<div id="bigmap" class="screen">
+  <div id="bigmapInner">
+    <canvas id="bigmapCanvas" width="880" height="632"></canvas>
+    <div id="bigmapSide">
+      <h3>CORAL BAY</h3>
+      <div class="legend"><span class="dotY"></span> Mission / place<br><span class="dotR"></span> Police<br><span class="dotW"></span> You</div>
+      <h4>MISSIONS</h4>
+      <div id="missionList"></div>
+      <h4>LUZ VEGA</h4>
+      <div id="statsText"></div>
+      <div class="mapHint">M / Esc — close</div>
+    </div>
+  </div>
+</div>
+
+<div id="deadScreen" class="screen">
+  <div id="deadTitle">WASTED</div>
+  <div id="deadSub"></div>
+</div>
+
+<div id="creditsScreen" class="screen">
+  <h2 class="gameTitle small">NEON <span>TIDE</span></h2>
+  <div class="creditsText">
+    Marlow is gone. The ledger burns in a marina barrel, and Marisol's leash burns with it.<br>
+    Luz Vega walks out of the tower plaza a free woman — rich, wanted by no one, owed by everyone.<br>
+    Coral Bay keeps spinning: the ferries, the neon, the tide.<br><br>
+    THE END — free roam unlocked. The city is yours.
+  </div>
+  <div id="creditsStats"></div>
+  <button id="btnCreditsClose" class="menuBtn">FREE ROAM</button>
+</div>
+
+<script src="vendor/three.min.js"></script>
+<script src="js/core/rng.js"></script>
+<script src="js/core/math3d.js"></script>
+<script src="js/core/input.js"></script>
+<script src="js/world/geometry-merge.js"></script>
+<script src="js/world/city-layout.js"></script>
+<script src="js/world/collision-world.js"></script>
+<script src="js/world/sky-lighting.js"></script>
+<script src="js/world/city-mesh.js"></script>
+<script src="js/world/landmarks.js"></script>
+<script src="js/world/props-instanced.js"></script>
+<script src="js/entities/vehicle-models.js"></script>
+<script src="js/entities/vehicle-physics.js"></script>
+<script src="js/entities/pedestrians.js"></script>
+<script src="js/entities/player.js"></script>
+<script src="js/entities/traffic.js"></script>
+<script src="js/entities/enemies.js"></script>
+<script src="js/systems/effects.js"></script>
+<script src="js/systems/wanted-level.js"></script>
+<script src="js/systems/police-ai.js"></script>
+<script src="js/systems/combat.js"></script>
+<script src="js/systems/economy.js"></script>
+<script src="js/systems/save-game.js"></script>
+<script src="js/systems/missions.js"></script>
+<script src="js/ui/hud.js"></script>
+<script src="js/ui/minimap.js"></script>
+<script src="js/ui/menus.js"></script>
+<script src="js/audio/synth-audio.js"></script>
+<script src="js/core/engine.js"></script>
+<script src="js/core/camera-rig.js"></script>
+<script src="js/dev/shot-scenes.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
